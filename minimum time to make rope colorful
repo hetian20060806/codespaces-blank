@@ -1,0 +1,38 @@
+#include<iostream>
+#include<vector>
+using namespace std;
+class Solution {
+public:
+    int minCost(string colors, vector<int>& neededTime) {
+        char prev = colors[0];
+        int total=0;
+        int tem =neededTime[0];
+        int minneeded = neededTime[0];
+        int n = neededTime.size();
+        for (int i = 1; i < n; i++) {
+            if (colors[i] == prev) {
+                tem += neededTime[i];
+                minneeded = max(minneeded, neededTime[i]);
+            }
+            else {
+                total += tem - minneeded;
+                tem = neededTime[i];
+                minneeded = neededTime[i];
+                prev = colors[i];
+            }
+        }
+        return total+tem-minneeded;
+    }
+};
+int main() {
+    string colors;
+    cin >> colors;
+    vector<int>neededTime;
+    int time;
+    while (cin >> time) {
+        neededTime.push_back(time);
+    }
+    Solution solution;
+    cout << solution.minCost(colors, neededTime);
+    return 0;
+}
