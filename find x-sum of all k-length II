@@ -1,0 +1,110 @@
+#include<iostream>
+#include<vector>
+#include<set>
+#include<unordered_map>
+#include<map>
+#include<functional>
+#include<algorithm>
+using namespace std;
+
+//class Solution {
+//public:
+//    vector<long long> findXSum(vector<int>& nums, int k, int x) {
+//        int n = nums.size();
+//        vector<long long>result;
+//        map<int, int>freq;
+//        set<pair<int, int>, greater<pair<int, int>>>sorted;
+//        for (int i = 0; i < k; i++) {
+//            freq[nums[i]]++;
+//        }
+//        for (auto& num : freq) {
+//            sorted.insert({ num.second,num.first });
+//        }
+//        for (int i = 0; i <=n - k; i++) {
+//            long long sum = 0,cnt = 0;
+//            for (auto it = sorted.begin(); it != sorted.end() && cnt < x; it++, cnt++) {
+//                sum += it->first * it->second;
+//            }
+//            result.push_back(sum);
+//            if (i < n - k) {
+//                int left = nums[i];
+//                int oldcount = freq[left];
+//                sorted.erase({ oldcount,left });
+//                freq[left]--;
+//                if (freq[left] > 0) {
+//                    sorted.insert({ freq[left],left });
+//                }
+//                else {
+//                    freq.erase(left);
+//                }
+//                int right = nums[i + k];
+//                if (freq.count(right)) {
+//                    sorted.erase({ freq[right],right });
+//                }
+//                freq[right]++;
+//                sorted.insert({ freq[right],right });
+//            }
+//        }
+//        return result;
+//    }
+//};
+
+
+class Solution {
+public:
+    vector<long long> findXSum(vector<int>& nums, int k, int x) {
+        using i64 = long long;
+        int n = nums.size();
+        vector<i64> ans(n - k + 1);
+        std::unordered_map<int, int> cnt;
+        std::set<std::pair<int, int>> xarr, remain;//xarr 存储前 x 大，remain 存储剩余的
+        i64 xsum = 0;
+        //单值更新，删除旧的，加入新的
+        auto update = [&](int value, int old_count, int new_count) {
+            if (xarr.erase({ old_count, value })) {
+                xsum -= i64(old_count) * value;
+            }
+            else { //不在 xarr 中，那就尝试 ramain 中删除
+                remain.erase({ old_count, value });
+            }
+            //然后 引入新的值 {new_count, value}
+            remain.insert({ new_count, value });
+            auto it = std::prev(remain.end());
+            xsum += i64(it->first) * it->second;
+            xarr.insert(xarr.begin(), remain.extract(it));
+            if (xarr.size() > x) {
+                auto it = xarr.begin();
+                xsum -= i64(it->first) * it->second;
+                remain.insert(remain.end(), xarr.extract(it));
+            }
+            };
+        for (int i = 0; i < k; i++) {
+            int old_count = cnt[nums[i]]++;
+            update(nums[i], old_count, old_count + 1);
+        }
+        ans[0] = xsum;
+        for (int i = k; i < n; i++) {
+            int old_count1 = cnt[nums[i - k]]--;
+            update(nums[i - k], old_count1, old_count1 - 1);
+            int old_count2 = cnt[nums[i]]++;
+            update(nums[i], old_count2, old_count2 + 1);
+            ans[i - k + 1] = xsum;
+        }
+        return ans;
+    }
+};
+int main() {
+    int k, x;
+    cin >> k >> x;
+    vector<int>nums;
+    int num;
+    while (cin >> num) {
+        nums.push_back(num);
+    }
+    Solution solution;
+    vector<long long>result = solution.findXSum(nums, k, x);
+    for (long long a : result) {
+        cout << a << " ";
+    }
+    return 0;
+}
