@@ -1,0 +1,37 @@
+#include<iostream>
+#include<vector>
+#include<unordered_map>
+using namespace std;
+class Solution {
+public:
+    vector<int> a;
+    int find(int x) {
+        return a[x] == x ? x : (a[x] = find(a[x]));
+		//是否已经是根节点，是则返回，否则递归查找根节点并路径压缩
+    }
+    vector<int> processQueries(int c, vector<vector<int>>& connections, vector<vector<int>>& queries) {
+        a.resize(c + 1);
+		//初始化各个节点的父节点为自己
+        for (int i = 1; i <= c; i++) a[i] = i;
+        for (auto& i : connections)
+            a[find(i[0])] = find(i[1]);
+		//将每个连通块中的节点存储在哈希表中
+        unordered_map<int, vector<int>> mp;
+		//从大到小存储节点，方便后续查询未维护的最大节点
+        for (int i = c; i >= 1; i--)
+            mp[find(i)].push_back(i);
+        vector<int> ans, b(c + 1);
+        for (auto& q : queries) {
+            if (q[0] == 1) {
+                if (b[q[1]]) {
+                    auto& v = mp[find(q[1])];
+                    while (v.size() && b[v.back()]) v.pop_back();
+                    ans.push_back(v.size() ? v.back() : -1);
+                }
+                else ans.push_back(q[1]);
+            }
+            else b[q[1]] = 1;
+        }
+        return ans;
+    }
+};
