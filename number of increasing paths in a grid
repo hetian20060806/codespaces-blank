@@ -1,0 +1,39 @@
+#include<iostream>
+#include<vector>
+#include<unordered_map>
+//为了得到 target 第 i 个字符（下标从 0 开始），当 target[i] = words[j][k] 时
+// 你可以使用 words 列表中第 j 个字符串的第 k 个字符。
+using namespace std;
+class Solution {
+public:
+    int numWays(vector<string>& words, string target) {
+        int n = target.size();
+		int m = words.size();
+        int k = words[0].size();
+		const int MOD = 1e9 + 7;
+        vector<long long>dp(n, 0);
+        dp[0] = 1;
+		for (int i = 0; i < k; i++) {//遍历每一列
+            unordered_map<char,long long>dictionary;
+            for (int j = 0; j < m; j++) {
+				dictionary[words[j][i]]++;
+            }
+            for (int t = min(i,n-1); t>=0; t--) {
+                dp[t + 1] = (dp[t + 1] + dp[t] * dictionary[target[t]]%MOD) % MOD;
+            }
+        }
+		return dp[n];
+    }
+};
+int main() {
+    Solution a;
+    string target;
+    cin >> target;
+    string word;
+	vector<string>words;
+    while (cin >> word&&word!="end") {
+        words.push_back(word);
+	}
+    cout << a.numWays(words, target) << endl;
+	return 0;
+}
