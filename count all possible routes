@@ -1,0 +1,98 @@
+#include <vector>
+#include <cstring>
+#include <cmath>
+#include <functional>
+#include <algorithm>
+#include <iostream>
+
+using namespace std;
+
+//class Solution {
+//public:
+//    int countRoutes(vector<int>& locations, int start, int finish, int fuel) {
+//        int n = locations.size();
+//        const int MOD = 1e9 + 7;
+//        vector<vector<int>>dp(n, vector<int>(fuel+1, 0));
+//		dp[finish][0] = 1;
+//        for (int f = 1; f <= fuel; ++f) {
+//            for (int i = 0; i < n; i++) {
+//                if (i == finish) dp[i][f] = (dp[i][f] + 1) % MOD;
+//                for (int j = 0; j < n; j++) {
+//                    if (i != j) {
+//                        int cost = abs(locations[i] - locations[j]);
+//                        if (f >= cost) {
+//                            dp[i][f] = (dp[i][f] + dp[j][f - cost]) % MOD;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        return dp[start][fuel];
+//    }
+//};
+class Solution {
+public:
+    int countRoutes(vector<int>& locations, int start, int finish, int fuel) {
+        int n = locations.size();
+		const int MOD = 1e9 + 7;
+		int startloc = locations[start];
+		int finishloc = locations[finish];
+		sort(locations.begin(), locations.end());
+		vector<vector<int>>dp(n, vector<int>(fuel + 1, 0));
+		int startIndex = -1;
+        int finishIndex = -1;
+        for (int i = 0; i < n; i++) {
+            if (startIndex==-1&&locations[i] == startloc) {
+                startIndex = i;
+            }
+            if (finishIndex==-1&&locations[i] == finishloc) {
+                finishIndex = i;
+			}
+            if (finishIndex != -1 && startIndex != -1) {
+                break;
+            }
+        }
+        dp[finishIndex][0] = 1;
+        for (int f = 1; f <= fuel; ++f) {
+			//两种情况：向左走和向右走
+            for (int i = 0; i < n; i++) {
+                if (i == finishIndex) dp[i][f] = (dp[i][f] + 1) % MOD;
+                for (int j = i+1; j < n; j++) {
+                        int cost =locations[j] - locations[i];
+                        if (f >= cost) {
+                            dp[i][f] = (dp[i][f] + dp[j][f - cost]) % MOD;
+                        }
+                        else {
+                            break;
+                        }
+                }
+                for (int j = i - 1; j >= 0; j--) {
+                    int cost =locations[i] - locations[j];
+                    if (f >= cost) {
+                        dp[i][f] = (dp[i][f] + dp[j][f - cost]) % MOD;
+                    }
+                    else {
+                        break;
+                    }
+                }
+            }
+        }
+		return dp[startIndex][fuel];
+    }
+};
+int main() {
+    Solution sol;
+    vector<int> locations;
+    int start;
+    int finish;
+    int fuel;
+    int location;
+    cin >> start >> finish >> fuel;
+    while (cin >> location) {
+        locations.push_back(location);
+    }
+    int result = sol.countRoutes(locations, start, finish, fuel);
+    cout << result << endl;
+
+    return 0;
+}
