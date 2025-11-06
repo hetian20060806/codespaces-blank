@@ -1,0 +1,30 @@
+class Solution {
+public:
+    int countPaths(vector<vector<int>>& grid) {
+        int m = grid.size();
+        int n = grid[0].size();
+        vector<vector<int>> memo(m, vector<int>(n, -1));
+        const int MOD = 1e9 + 7;
+        int directions[4][2] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
+        function<int(int, int)> dfs = [&](int i, int j) {
+            if (memo[i][j] != -1) return memo[i][j];
+            long long result = 1;
+            for (auto& dir : directions) {
+                int ni = i + dir[0];
+                int nj = j + dir[1];
+
+                if (ni >= 0 && ni < m && nj >= 0 && nj < n && grid[ni][nj] > grid[i][j]) {
+                    result = (result + dfs(ni, nj)) % MOD;
+                }
+            }
+            return memo[i][j] = result;
+            };
+        int total = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                total = (total + dfs(i, j)) % MOD;
+            }
+        }
+        return total;
+    }
+};
